@@ -1,0 +1,38 @@
+{% extends 'template/user_common_page.html' %}
+
+{% block head_custom_style %}
+{{ super() }}
+<style>
+    div.main { padding: 10px; }
+    input, button, select { padding:5px; }
+    form > div { padding:5px; }
+    form > div > label { display: inline-block; width:80px; text-align: right; padding-right: 8px; }
+    form > div > span { padding-left: 8px; }
+    form input[type=submit] { margin-left:100px; width:140px; }
+    input[type=text], input[type=password] { width:270px; }
+    #info { color:red; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main">
+    <h1>Register Page</h1>
+    <br>
+    <form method="post" action="register">
+        <div><label>username: </label><input name="username" type="text" placeholder="username" required></div>
+        <div><label>nickname: </label><input name="nickname" type="text" placeholder="nickname" required></div>
+        <div><label>email: </label><input name="email" type="text" placeholder="email [optional]"></div>
+        <div><label>phone: </label><input name="phone" type="text" placeholder="phone [optional]"></div>
+        <div><label>password: </label><input name="pwd" type="password" required><span>length >= 6</span></div>
+        <div><input type="submit" value="Register"></div>
+    </form>
+    <div>
+        <p id="info">{{data.err}}</p>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block footer_custom_script %}
+{{ super() }}
+{% endblock %}

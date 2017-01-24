@@ -1,0 +1,34 @@
+{% extends 'template/user_common_page.html' %}
+
+{% block head_custom_style %}
+{{ super() }}
+<style>
+    div.main { padding: 10px; }
+    input, button, select { padding:5px; }
+    #info { color:red; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main">
+    <h1>Login Page</h1>
+    <br>
+    <form method="post" action="login">
+        <input name="account" type="text" placeholder="username/phone/email">
+        <input name="pwd" type="password">
+        <input type="submit" value="Login">
+    </form>
+    <div>
+        <p id="info">{{data.err}}</p>
+    </div>
+    <br>
+    <p>
+        <span>No account yet? </span><a href="register">Register</a>
+    </p>
+</div>
+
+{% endblock %}
+
+{% block footer_custom_script %}
+{{ super() }}
+{% endblock %}

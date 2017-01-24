@@ -1,0 +1,162 @@
+{% extends 'template/user_common_page.html' %}
+
+{% block head_custom_style %}
+<script type="text/javascript" src="{{setting.RES_CDN_DOMAIN}}/js/realtime.js"></script>
+{{ super() }}
+<style>
+    div.main { padding: 10px; width:100%; height:100%; }
+    div.wrapper { height:60%; width:100%; margin-top:5px; margin-bottom: 5px; }
+    div.ctrl { clear: both; }
+    #chat { width:40%; height:100%; min-width:600px; padding:5px; float: left; overflow-x: hidden; background: #eeeeee; }
+    #users { width:250px; height:100%; padding:5px; margin-left:10px; float: left; background: #eeeeee; }
+    #msg { width:40%; }
+    div.user_item { width:100%; padding:5px; color:blue; }
+    button, input { padding:5px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main">
+    <h1>Index</h1>
+    <h2 style="font-weight: normal;">This is a game project.</h2>
+    <br>
+    {% if user.isLogined %}
+    <p>
+        <a href="logout">Logout</a>
+    </p>
+    <div class="rooms">
+        <button onclick="switchRoom('lobby')" room="lobby">Lobby</button>
+        <button onclick="switchRoom('room1')" room="room1">Room-1</button>
+        <button onclick="switchRoom('room2')" room="room2">Room-2</button>
+    </div>
+    <div class="wrapper">
+        <div id="chat">
+
+        </div>
+        <div id="users">
+            <p>Online Users</p>
+            <div>
+
+            </div>
+        </div>
+    </div>
+    <div class="ctrl">
+        <input id="msg" type="text">
+        <input id="sendBtn" type="button" value="Send" onclick="talk()">
+    </div>
+    {% else %}
+    <p>
+        <a href="register">Register</a>
+    </p>
+    <p>
+        <span>Already has an account? </span><a href="login">Login</a>
+    </p>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block footer_custom_script %}
+{{ super() }}
+<script>
+
+    var client;
+    var users = {};
+    var rooms = [];
+    var selectedRoom;
+
+    function $inited() {
+
+        var sess = {};
+        sess.userid = $user.id;
+        sess.token = $user.token;
+        sess.tokentimestamp = $user.tokentimestamp;
+        realtime.connect("{{setting.websocketURL}}", sess, function(client) {
+            window.client = client;
+
+            //enter lobby
+            client.on("enter", enterHandler);
+            client.on("leave", leaveHandler);
+            client.on("talk", talkHandler);
+            client.on("disconnect", disconnectHandler);
+        });
+
+        $('#msg').on("keypress", function(evt) {
+            if (evt.which == 13) talk();
+        });
+    }
+
+    function enterHandler(data) {
+        if (data.user.id == $user.id) {
+            //self enter
+            $('#chat').html('');
+            $('#users').find('div[client]').remove();
+
+            rooms[data.room] = 1;
+            selectedRoom = data.room;
+
+            for (var uid in data.users ) {
+                var uobj = data.users[uid];
+                users[uid] = uobj;
+                $('#users').append('<div class="user_item" client="' + uobj.id + '">' + uobj.nickname + '</div>');
+            }
+
+            $('button[room]').each(function() {
+                this.removeAttribute('disabled');
+            });
+            $('button[room=' + data.room + ']').attr('disabled', true);
+        } else {
+            if (data.room != selectedRoom) return;
+        }
+        if (!users[data.user.id]) {
+            users[data.user.id] = data.user;
+            $('#users').find('div[client=' + data.user.id + ']').remove();
+            $('#users').append('<div class="user_item" client="' + data.user.id + '">' + data.user.nickname + '</div>');
+        }
+        print('[' + convertTimeToDate(data.time, true, 'en').split(" ")[1] + '] <b>*' + data.user.nickname + '* enter.</b>');
+    }
+
+    function leaveHandler(data) {
+        if (data.room != selectedRoom) return;
+
+        if (data.id == $user.id) {
+            //self leave
+            delete rooms[data.room];
+            selectedRoom = undefined;
+            $('#chat').html('');
+            $('#users').find('div[client]').remove();
+        } else {
+            console.log(users);
+            var client = users[data.id];
+            print('[' + convertTimeToDate(data.time, true, 'en').split(" ")[1] + '] <b>*' + client.nickname + '* leave.</b>');
+            delete users[data.id];
+            $('#users').find('div[client=' + data.id + ']').remove();
+        }
+    }
+
+    function talkHandler(data) {
+        if (data.room != selectedRoom) return;
+        print('[' + convertTimeToDate(data.time, true, 'en').split(" ")[1] + '] ' + data.user.nickname + ': ' + data.msg);
+    }
+
+    function disconnectHandler() {
+        $('#users').find('div[client]').remove();
+        print('<span style="color: red;">connection disconnected...</span>');
+    }
+
+    function talk() {
+        client.message("talk", { room:selectedRoom, msg: $('#msg').val() });
+        $('#msg').val('');
+    }
+
+    function print(msg) {
+        $('#chat').append('<p>' + msg + '</p>');
+        $('#chat').scrollTop($(document).height());
+    }
+
+    function switchRoom(room) {
+        client.message("enter", { room:room });
+    }
+
+</script>
+{% endblock %}
