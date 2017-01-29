@@ -73,7 +73,7 @@ Realtime.on("disconnect", async function(socket) {
     }
 });
 
-Realtime.on("shakeHandeSuccess", async function(socket) {
+Realtime.on("shakeHandSuccess", async function(socket) {
     try {
         await enterRoom(socket, 'lobby');
     } catch (exp) {
