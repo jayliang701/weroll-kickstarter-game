@@ -26,13 +26,11 @@ async function processLogin(req, res, output) {
 
         user = user.toObject();
         user.extra = [ user.username, user.nickname, user.email || "", user.phone || "" ];
-        var sess = await Session.getSharedInstance().save(user);
+        var auth = await Session.getSharedInstance().save(user);
 
         //set cookies
         var option = { path: Setting.session.cookiePath, expires: new Date(Date.now() + Setting.session.cookieExpireTime) };
-        res.cookie("userid", sess.userid, option);
-        res.cookie("token", sess.token, option);
-        res.cookie("tokentimestamp", sess.tokentimestamp, option);
+        res.cookie("authorization", auth, option);
     } catch (exp) {
         return output({ err:"username or password is wrong." });
     }
@@ -75,12 +73,10 @@ async function processRegister(req, res, output) {
     try {
         var temp = doc.toObject();
         temp.extra = [ username, nickname, email || "", phone || "" ];
-        var sess = await Session.getSharedInstance().save(temp);
+        var auth = await Session.getSharedInstance().save(temp);
         //set cookies
         var option = { path: Setting.session.cookiePath, expires: new Date(Date.now() + Setting.session.cookieExpireTime) };
-        res.cookie("userid", sess.userid, option);
-        res.cookie("token", sess.token, option);
-        res.cookie("tokentimestamp", sess.tokentimestamp, option);
+        res.cookie("authorization", auth, option);
     } catch (exp) {
         console.error(exp);
     }
@@ -92,9 +88,7 @@ async function processRegister(req, res, output) {
 function processLogout(req, res, output, user) {
     //clear cookie
     var option = { path: Setting.session.cookiePath };
-    res.clearCookie("userid", option);
-    res.clearCookie("token", option);
-    res.clearCookie("tokentimestamp", option);
+    res.clearCookie("authorization", option);
 
     //clear session
     Session.getSharedInstance().remove(user);

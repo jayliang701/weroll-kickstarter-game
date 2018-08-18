@@ -66,12 +66,7 @@
     var selectedRoom;
 
     function $inited() {
-
-        var sess = {};
-        sess.userid = $user.id;
-        sess.token = $user.token;
-        sess.tokentimestamp = $user.tokentimestamp;
-        realtime.connect("{{setting.websocketURL}}", sess, function(client) {
+        realtime.connect("{{setting.websocketURL}}", $user.auth, function(client) {
             window.client = client;
 
             //enter lobby
@@ -126,7 +121,6 @@
             $('#chat').html('');
             $('#users').find('div[client]').remove();
         } else {
-            console.log(users);
             var client = users[data.id];
             print('[' + convertTimeToDate(data.time, true, 'en').split(" ")[1] + '] <b>*' + client.nickname + '* leave.</b>');
             delete users[data.id];

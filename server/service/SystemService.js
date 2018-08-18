@@ -13,7 +13,7 @@ exports.config = {
 
 var CODES = require("weroll/ErrorCodes");
 
-exports.now = function(req, res, params) {
+exports.now = function(params) {
     var format = params.format;
     if (format == 1 || format == 2) {
         var now = new Date();
@@ -22,9 +22,9 @@ exports.now = function(req, res, params) {
         } else {
             now = now.toString();
         }
-        res.sayOK({ time:now });
+        return { time:now };
     } else {
-        res.sayError(CODES.REQUEST_PARAMS_INVALID, "invalid time format");
+        throw Error.create(CODES.REQUEST_PARAMS_INVALID, "invalid time format");
     }
 }
 

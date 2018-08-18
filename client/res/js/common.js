@@ -99,7 +99,7 @@ function hashMapToArray(map, json, loopFunc) {
 var isIE = $checkIsIE();
 var IE_VER = 0;
 var isBelowIE10 = $checkIsBelowIE10();
-var broswerType = $checkBroswer();
+var broswerType = $checkBrowser();
 var isMobile = $checkIsMobile();
 
 function $checkIsIE() {
@@ -127,7 +127,7 @@ function $checkIsBelowIE10() {
     return false;
 }
 
-function $checkBroswer() {
+function $checkBrowser() {
     if(navigator.userAgent.indexOf('Trident') > 0 && navigator.userAgent.indexOf('rv:11') > 0) {
         return "IE";
     }

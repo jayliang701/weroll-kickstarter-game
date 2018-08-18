@@ -12,7 +12,7 @@ realtime.traceError = function() {
 }
 window.realtime = realtime;
 
-realtime.connect = function(url, sess, callBack) {
+realtime.connect = function(url, auth, callBack) {
     function Client(url) {
         var ins = this;
         var option = { forceNew:true };
@@ -28,8 +28,8 @@ realtime.connect = function(url, sess, callBack) {
         this.socket = socket;
         socket.on("connect", function() {
             realtime.traceLog('connected to ' + url);
-            realtime.traceLog('start shakehand with session: ', sess);
-            socket.emit('$init', { _sess:sess });
+            realtime.traceLog('start shakehand with session: ', auth);
+            socket.emit('$init', { _auth:auth });
         });
         socket.on("$init", function(data) {
             ins.clientID = socket.clientID = data.clientID;
@@ -67,7 +67,7 @@ realtime.connect = function(url, sess, callBack) {
 
     if (!realtime.ready) {
         //wait
-        realtime.__reqs.push([ url, sess, callBack ]);
+        realtime.__reqs.push([ url, auth, callBack ]);
     } else {
         var client = new Client(url);
         setTimeout(function () {
